@@ -10,6 +10,8 @@ from time import gmtime, strftime
 import time
 import shutil
 import ntpath
+import fitz
+import datetime
 
 nowTime=strftime("%Y_%m_%d_%H_%M", gmtime())
 
@@ -198,11 +200,29 @@ class ExtractW2data():
                 return StatementYear, isYearFound2
         return StatementYear, isYearFound2
 
-    def ConvertPdfToImgs(self,eachpdf):
+    def findyear3(self,pdfPath):
+        try:
+            doc = fitz.open(pdfPath)
+            nowyear = datetime.datetime.now().year
+            for pageNum, pageData in enumerate(doc):
+                pageData = doc.loadPage(pageNum)
+                pageText = pageData.getText("text")
+                if len(pageText)>0:
+                    for checkYear in range(2000, nowyear):
+                        if str(checkYear) in (pageText):
+                            return [checkYear]
+            return []
+        except:
+            return []
+
+    def ConvertPdfToImgs(self,eachpdf,page_num):
         PdfImgFolderPath=""
         #print(eachpdf)
         try:
-            numberPages = convert_from_path(eachpdf)
+            numberPages = convert_from_path(eachpdf,first_page=page_num,last_page=page_num)
+            if len(numberPages)==0:
+                numberPages = convert_from_path(eachpdf, first_page=1, last_page=1)
+
             foldername, file_extension = os.path.splitext(eachpdf)
             foldername = os.path.basename(foldername)
             # foldername=str(i)+"_"+foldername
@@ -462,32 +482,57 @@ class ExtractW2data():
         #print(extracted_data)
         return (extracted_data)
 
-    def process_w2(self,eachpdf):
-        fetaures={}
+    def process_w2(self,eachpdf,page_num):
+        tempfetaures={}
+        tempfetaures["filename"] = os.path.basename(eachpdf)
+        # featurelist=['employer name','employee name', 'employer id number', 'wages tips other comp', 'social security wages', 'medicare wages and tips']
+        # for xfeature in featurelist:
+        #     tempfetaures[xfeature]=""
+        tempfetaures["employer name"] = " "
+        tempfetaures["employee name"] = " "
+        tempfetaures["employer id number"] = " "
+        tempfetaures["wages tips other comp"] = -9999.99
+        tempfetaures["social security wages"] = -9999.99
+        tempfetaures["medicare wages and tips"] = -9999.99
+        tempfetaures["year"] = []
+
+
+
+
         try:
-            isImagesCreated = (self.ConvertPdfToImgs(eachpdf))
+            isImagesCreated = (self.ConvertPdfToImgs(eachpdf,page_num))
             if isImagesCreated:
                 pfilename, pfile_extension = os.path.splitext(eachpdf)
                 imgPdfsPath = os.path.basename(pfilename)
                 fetaures = self.extractdata(imgPdfsPath)
                 shutil.rmtree(self.ConvertedImgsPath)
-                return fetaures
+
+
+                if fetaures['year']=='' or fetaures['year']==[]:
+                    year3=self.findyear3(eachpdf)
+                    if len(year3)>0:
+                        fetaures['year']=[str(year3[0])]
+                    else:
+                        fetaures['year']=['']
+                    return fetaures
+                else:
+                    return fetaures
             else:
-                return fetaures
+                return tempfetaures
         except:
-            return fetaures
+            return tempfetaures
 
 
 if __name__== "__main__" :
     obj=ExtractW2data()
     strtTime=time.time()
-    eachpdf="/Users/rsachdeva/Documents/pythonProjs/formW2/w2_img_data_single/data/w2_pdfs/0_0064O00000kStUbQAK-00P4O00001LHAVRUA5-W2 2018.pdf"
-    print(obj.process_w2(eachpdf))
+    eachpdf="/Users/rsachdeva/Documents/pythonProjs/W2/0064O00000jttNLQAY-00P4O00001JjOs8UAF-salvatore_rabito_w2_or_1040_or.PDF"
+    print(obj.process_w2(eachpdf,12))
 
     #imgsData=glob.glob("../data/w2_imgs/*.jpg") +glob.glob("../data/w2_imgs2/*.jpeg")+glob.glob("../data/w2_imgs2/*.png")
 
-    eachimg="/Users/rsachdeva/Documents/pythonProjs/w2_29Oct/W2_data/New_W2/0064O00000jfdbsQAA-00P4O00001Kmgr4UAB-Richard Winkleblack - W2 -1.jpg"
-    y= obj.extract_img_data(eachimg)
-    print(y)
-    endTime=time.time()
-    print(endTime-strtTime)
+    # eachimg="/Users/rsachdeva/Documents/pythonProjs/w2_29Oct/W2_data/New_W2/0064O00000jfdbsQAA-00P4O00001Kmgr4UAB-Richard Winkleblack - W2 -1.jpg"
+    # y= obj.extract_img_data(eachimg)
+    # print(y)
+    # endTime=time.time()
+    # print(endTime-strtTime)

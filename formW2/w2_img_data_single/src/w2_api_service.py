@@ -22,7 +22,7 @@ from flask import json
 from flask.globals import request
 import os
 
-testfile=open("../test_valiresults.csv","a")
+testfile=open("../test_valiresults1.csv","a")
 
 config_file_loc = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "config", "config.cfg")
 if os.path.isfile(config_file_loc) == False:
@@ -212,6 +212,7 @@ def processw2Api():
 
 if __name__ == '__main__':
     app.run(server_add, port=(port_num), debug=False, threaded=True)
+
     # import requests, glob, os, json
     #
     # files = glob.glob("New_W2/*.*")
