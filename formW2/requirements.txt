@@ -1,4 +1,4 @@
-opencv-python==4.1.0.25
+opencv-python==4.1.1.26
 tornado==5.1.1
 Pillow==6.1.0
 pytesseract==0.2.7
