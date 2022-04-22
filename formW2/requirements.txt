@@ -14,7 +14,7 @@ pdftables==0.0.3
 xlrd==1.2.0
 pandas==0.24.2
 camelot-py==0.7.3
-PyPDF2==1.26.0
+PyPDF2==1.27.5
 fuzzywuzzy==0.17.0
 xlwt==1.2.0
 unicodecsv==0.14.1
