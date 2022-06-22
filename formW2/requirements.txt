@@ -19,7 +19,7 @@ fuzzywuzzy==0.17.0
 xlwt==1.2.0
 unicodecsv==0.14.1
 configparser==3.5.0
-numpy==1.16.4
+numpy==1.22.0
 PyMuPDF==1.16.10
 fitz
 
